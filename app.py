@@ -256,4 +256,5 @@ init_db()
 if __name__ == "__main__":
     if ADMIN_PASSWORD == "changeme":
         print("WARNING: set ADMIN_PASSWORD before putting this site online.")
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host="0.0.0.0", port=port, debug=False)
