@@ -107,7 +107,7 @@ def clean_text(value, max_len):
 
 @app.get("/")
 def home():
-    return send_from_directory(app.static_folder, "index.html")
+    return send_from_directory(os.path.join(BASE_DIR, "static"), "index.html")
 
 
 @app.get("/api/menu")
