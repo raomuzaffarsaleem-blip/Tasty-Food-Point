@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Orders | Tasty Food Point</title>
+  <style>
+    :root { --chili:#c62718; --turmeric:#ffc926; --char:#2a1d17; --ash:#6b5e57; --leaf:#1f7a4d; --line:#e6dcd0; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--char); background:#faf7f2; line-height:1.5; }
+    header { background:var(--turmeric); border-bottom:6px solid var(--chili); padding:1rem 1.25rem; display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+    h1 { margin:0; font-size:1.4rem; }
+    .meta { color:var(--char); font-size:.9rem; }
+    main { max-width:60rem; margin:0 auto; padding:1.25rem; }
+    .tabs { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .tabs button { font:inherit; font-weight:600; padding:.5rem 1rem; border:2px solid var(--char); background:#fff; border-radius:.5rem; cursor:pointer; min-height:2.5rem; }
+    .tabs button[aria-pressed="true"] { background:var(--char); color:#fff; }
+    .order { background:#fff; border:1px solid var(--line); border-left:6px solid var(--chili); border-radius:.5rem; padding:1rem; margin-bottom:1rem; }
+    .order.preparing { border-left-color:var(--turmeric); }
+    .order.done { border-left-color:var(--leaf); }
+    .order.cancelled { border-left-color:var(--ash); opacity:.75; }
+    .row { display:flex; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+    .num { font-weight:800; font-size:1.2rem; }
+    .muted { color:var(--ash); font-size:.9rem; }
+    ul { margin:.6rem 0; padding-left:1.2rem; }
+    .actions { display:flex; gap:.5rem; flex-wrap:wrap; margin-top:.75rem; }
+    .actions button, .actions a { font:inherit; font-weight:600; padding:.45rem .9rem; border-radius:.5rem; border:2px solid var(--leaf); background:#fff; color:var(--leaf); cursor:pointer; text-decoration:none; min-height:2.4rem; }
+    .actions button.danger { border-color:var(--chili); color:var(--chili); }
+    .empty { color:var(--ash); padding:2rem 0; text-align:center; }
+    :focus-visible { outline:3px solid var(--chili); outline-offset:2px; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Tasty Food Point: orders</h1>
+  <span class="meta" id="updated">Loading...</span>
+</header>
+<main>
+  <div class="tabs" id="tabs"></div>
+  <div id="list"></div>
+</main>
+<script>
+(function () {
+  var filter = "active";
+  var orders = [];
+  var tabs = [["active", "Active"], ["new", "New"], ["preparing", "Preparing"], ["done", "Done"], ["cancelled", "Cancelled"], ["all", "All"]];
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function money(n) { return "Rs. " + Math.round(n).toLocaleString("en-PK"); }
+  function qty(l) { return l.unit === "kg" ? (l.qty < 1 ? Math.round(l.qty * 1000) + " g" : (l.qty % 1 === 0 ? l.qty + " kg" : (l.qty * 1000) + " g")) : l.qty; }
+  function when(iso) { return new Date(iso).toLocaleString("en-PK", { dateStyle: "medium", timeStyle: "short" }); }
+
+  function visible(o) {
+    if (filter === "all") return true;
+    if (filter === "active") return o.status === "new" || o.status === "preparing";
+    return o.status === filter;
+  }
+
+  function renderTabs() {
+    document.getElementById("tabs").innerHTML = tabs.map(function (t) {
+      var n = orders.filter(function (o) { return t[0] === "all" ? true : t[0] === "active" ? (o.status === "new" || o.status === "preparing") : o.status === t[0]; }).length;
+      return '<button type="button" data-f="' + t[0] + '" aria-pressed="' + (filter === t[0]) + '">' + t[1] + " (" + n + ")</button>";
+    }).join("");
+  }
+
+  function render() {
+    renderTabs();
+    var shown = orders.filter(visible);
+    if (!shown.length) { document.getElementById("list").innerHTML = '<p class="empty">No orders here.</p>'; return; }
+    document.getElementById("list").innerHTML = shown.map(function (o) {
+      var phone = o.phone.replace(/[^\d+]/g, "");
+      return '<article class="order ' + o.status + '">' +
+        '<div class="row"><span class="num">Order #' + o.id + '</span><span class="muted">' + when(o.created_at) + " &middot; " + esc(o.status) + "</span></div>" +
+        "<p><strong>" + esc(o.customer_name) + "</strong> &middot; " + esc(o.phone) + "</p>" +
+        "<p>" + (o.order_type === "pickup" ? "Pickup from the shop" : "Delivery to: " + esc(o.address)) + "</p>" +
+        "<ul>" + o.items.map(function (l) { return "<li>" + esc(l.name) + (l.note ? " (" + esc(l.note) + ")" : "") + ": " + qty(l) + " = " + money(l.line_total) + "</li>"; }).join("") + "</ul>" +
+        (o.notes ? '<p class="muted">Notes: ' + esc(o.notes) + "</p>" : "") +
+        '<p><strong>Total: ' + money(o.total) + "</strong> (cash)</p>" +
+        '<div class="actions">' +
+        '<a href="tel:' + esc(phone) + '">Call customer</a>' +
+        (o.status !== "preparing" ? '<button type="button" data-id="' + o.id + '" data-s="preparing">Start preparing</button>' : "") +
+        (o.status !== "done" ? '<button type="button" data-id="' + o.id + '" data-s="done">Mark done</button>' : "") +
+        (o.status !== "cancelled" ? '<button type="button" class="danger" data-id="' + o.id + '" data-s="cancelled">Cancel</button>' : "") +
+        "</div></article>";
+    }).join("");
+  }
+
+  function load() {
+    fetch("/api/admin/orders", { credentials: "same-origin" })
+      .then(function (r) { if (!r.ok) throw new Error("auth"); return r.json(); })
+      .then(function (d) {
+        var before = orders.length;
+        orders = d.orders;
+        render();
+        document.getElementById("updated").textContent = "Updated " + new Date().toLocaleTimeString("en-PK", { timeStyle: "short" }) + ". Refreshes every 20 seconds.";
+        if (before && orders.length > before) document.title = "(New) Orders | Tasty Food Point";
+      })
+      .catch(function () { document.getElementById("updated").textContent = "Could not load orders. Reload the page and log in again."; });
+  }
+
+  document.addEventListener("click", function (ev) {
+    var f = ev.target.closest("[data-f]");
+    if (f) { filter = f.getAttribute("data-f"); render(); return; }
+    var b = ev.target.closest("[data-s]");
+    if (!b) return;
+    fetch("/api/admin/orders/" + b.getAttribute("data-id") + "/status", {
+      method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: b.getAttribute("data-s") })
+    }).then(load);
+  });
+
+  load();
+  setInterval(load, 20000);
+})();
+</script>
+</body>
+</html>

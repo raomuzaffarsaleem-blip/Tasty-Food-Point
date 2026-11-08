@@ -1,0 +1,78 @@
+{
+  "shop": {
+    "name": "Tasty Food Point",
+    "owner": "Muhammad Shafique",
+    "phone": "03006824417",
+    "phone_display": "0300-6824417",
+    "whatsapp_number": "923006824417",
+    "address": "Near Burana Market, Mailsi Road, Karam Pur",
+    "hours": "10:00 am to 11:00 pm"
+  },
+  "currency": "Rs.",
+  "items": [
+    {
+      "id": "zinger-shawarma",
+      "name": "Zinger Shawarma",
+      "price": 150,
+      "unit": "piece",
+      "note": "",
+      "desc": "Crispy zinger strips with special sauce",
+      "icon": "shawarma",
+      "image": "/static/images/shawarma.jpg",
+      "image_pos": "50% 58%"
+    },
+    {
+      "id": "zinger-burger-large",
+      "name": "Zinger Burger",
+      "price": 250,
+      "unit": "piece",
+      "note": "Large",
+      "desc": "Extra crispy chicken fillet and cheese",
+      "icon": "burger",
+      "image": "/static/images/burger-large.jpg"
+    },
+    {
+      "id": "zinger-burger-small",
+      "name": "Zinger Burger",
+      "price": 200,
+      "unit": "piece",
+      "note": "Small",
+      "desc": "Delicious and juicy small burger",
+      "icon": "burger",
+      "image": "/static/images/burger-small.jpg",
+      "image_pos": "50% 42%"
+    },
+    {
+      "id": "zinger-paratha-roll",
+      "name": "Zinger Paratha Roll",
+      "price": 250,
+      "unit": "piece",
+      "note": "",
+      "desc": "Crispy paratha wrapped zinger",
+      "icon": "roll",
+      "image": "/static/images/paratha-roll.jpg",
+      "image_pos": "50% 50%"
+    },
+    {
+      "id": "hot-wings",
+      "name": "Hot Wings",
+      "price": 250,
+      "unit": "piece",
+      "note": "5 pieces",
+      "badge": "Spicy",
+      "desc": "Spicy and hot fried wings",
+      "icon": "wings",
+      "image": "/static/images/wings.jpg"
+    },
+    {
+      "id": "chicken-pakora",
+      "name": "Chicken Pakora",
+      "price": 1200,
+      "unit": "kg",
+      "note": "Per kg",
+      "desc": "Special crispy chicken pakora. Order from 250 g.",
+      "icon": "pakora",
+      "image": "/static/images/pakora.jpg"
+    }
+  ]
+}
