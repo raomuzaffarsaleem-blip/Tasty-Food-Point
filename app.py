@@ -31,7 +31,7 @@ MAX_PIECES = 50
 MAX_KG = 20
 KG_STEP = 0.25
 
-app = Flask(__name__, static_folder="static", static_url_path="/static")
+app = Flask(__name__, static_folder=os.path.join(BASE_DIR, "static"), static_url_path="/static")
 app.config["MAX_CONTENT_LENGTH"] = 64 * 1024  # orders are tiny; reject big bodies
 
 
